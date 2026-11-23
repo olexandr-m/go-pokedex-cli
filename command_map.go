@@ -1,51 +1,19 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 )
 
-type locationAreasResp struct {
-	Count    int     `json:"count"`
-	Next     *string `json:"next"`
-	Previous *string `json:"previous"`
-	Results  []struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	} `json:"results"`
-}
-
 func commandMap(cfg *config) error {
-	baseURL := "https://pokeapi.co"
-	endpoint := "/api/v2/location-area"
-	url := baseURL + endpoint
-	if cfg.Next != nil {
-		url = *cfg.Next
-	}
-
-	res, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
+	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.Next)
 	if err != nil {
 		return err
 	}
 
-	var locations locationAreasResp
-	err = json.Unmarshal(body, &locations)
-	if err != nil {
-		return err
-	}
+	cfg.Next = locationsResp.Next
+	cfg.Previous = locationsResp.Previous
 
-	cfg.Next = locations.Next
-	cfg.Previous = locations.Previous
-
-	for _, loc := range locations.Results {
+	for _, loc := range locationsResp.Results {
 		fmt.Println(loc.Name)
 	}
 
@@ -58,27 +26,15 @@ func commandMapb(cfg *config) error {
 		return nil
 	}
 
-	res, err := http.Get(*cfg.Previous)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
+	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.Previous)
 	if err != nil {
 		return err
 	}
 
-	var locations locationAreasResp
-	err = json.Unmarshal(body, &locations)
-	if err != nil {
-		return err
-	}
+	cfg.Next = locationsResp.Next
+	cfg.Previous = locationsResp.Previous
 
-	cfg.Next = locations.Next
-	cfg.Previous = locations.Previous
-
-	for _, loc := range locations.Results {
+	for _, loc := range locationsResp.Results {
 		fmt.Println(loc.Name)
 	}
 

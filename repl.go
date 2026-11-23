@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"pokedexcli/internal/pokeapi"
 	"strings"
 )
 
 type config struct {
-	Next     *string
-	Previous *string
-	commands map[string]cliCommand
+	pokeapiClient pokeapi.Client
+	Next          *string
+	Previous      *string
+	commands      map[string]cliCommand
 }
 
 type cliCommand struct {
