@@ -13,6 +13,7 @@ type config struct {
 	Next          *string
 	Previous      *string
 	commands      map[string]cliCommand
+	args          []string
 }
 
 type cliCommand struct {
@@ -43,6 +44,11 @@ func getCommands() map[string]cliCommand {
 			description: "Displays the previous 20 location areas",
 			callback:    commandMapb,
 		},
+		"explore": {
+			name:        "explore <location_name>",
+			description: "Explore a location area",
+			callback:    commandExplore,
+		},
 	}
 }
 
@@ -66,6 +72,7 @@ func startRepl(cfg *config) {
 		}
 
 		commandName := words[0]
+		cfg.args = words[1:]
 		command, exists := getCommands()[commandName]
 		if exists {
 			err := command.callback(cfg)
